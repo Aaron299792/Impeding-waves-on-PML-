@@ -14,6 +14,7 @@
 \usepackage{setspace}
 \usepackage{calc}
 \usepackage{multicol}
+\usepackage{hyperref}
 \usepackage[spanish]{babel}
 \usepackage{cancel}
 \usepackage[retainorgcmds]{IEEEtrantools}
@@ -50,7 +51,7 @@
 	\maketitle
 
   \begin{abstract}
-    \lipsum[10]
+    En la teoría electromagnética aplicada al estudio de materiales dieléctricos y sus aplicaciones, las soluciones de las ecuaciones de Maxwell son inevitablemente necesarias. El estudio de ondas incidentes sobre capas acopladas perfectamente PML es uno de los problemas de interés.  Se estudian las soluciones para un PML que es esfera dieléctrica centrada en una caja con ondas electromagnéticas (EMW) incidentes en el espacio 3D, mediante el método FTDT. El énfasis del proyecto es estudiar y analizar las soluciones  numéricas como comprobación del método FDTD. En este trabajo se implementó el método numérico usando \texttt{C++}, se discretizó el espacio y las ecuaciones de Amperè-Maxwell y Faraday en el espacio reciproco. Se obtuvieron y graficaron los campos $\textbf{E}$ y $\textbf{H}$.  Se comparó la solución a distintas frecuencias usando datos de una expansión de Bessel.  Las amplitudes teóricas y experimentales se obtuvieron datos cercanos, pero no del todo correcto con lo que se esperaba de la solución analítica, esto sugiere un problema en el manejo de datos en la implementación, sin embargo los perfiles de los campos se comportan como se espera lejos y dentro de la región del dieléctrico, el método es rápido y efectivo. El método es rápido y versátil. Los perfiles estudiados de los campos se ven como se esperaban. Se implementó un código funcional, pero no se descarta algún fallo semántico que genera leves diferencias entre los esperado analíticamente y los resultados números.
   \end{abstract}
 
   %\newpage
@@ -72,13 +73,17 @@
       \item Comparar los resultados numéricos con aquellos obtenidos analíticamente.
 		\end{enumerate}
 	
+	
+	\tableofcontents
+	\newpage
+	
 	\section{Introducción al problema}
 	
 El estudio de las ondas electromagnéticas (EMW) y de los materiales y medios dieléctricos son conceptos fundamentales y esenciales en el desarrollo de la teoría electromagnética. Usualmente el primer encuentro que se tiene en el estudio de las Ondas Electromagnéticas (EMW) introducen el problema en un medio completamente vacío donde la radiación no interactúa con ningún medio. Esto, pese a que da una intuición de como se comporta la radiación, no permite extender el conocimiento a los muchos fenómenos que surgen cuando las EMW interactúan con el medio. Efectos de resonancia de gran interés surgen cuando las ondas que se propagan en espacio vacío interactúan con un medio dieléctrico. 
 
 La simulación de ondas electromagnéticas en materiales dieléctricos es importante en muchas aplicaciones que controlan energía electromagnética, algunos ejemplos son cristales fotónicos y estructuras dieléctricas de aceleración. Muchos materias de gran importancia son anisotrópicos y presentan fenómenos de gran importancia, por tanto, simular sistemas con tensores dieléctricos resulta una tarea de suma bastante fructífera \cite{werner2007}. Los métodos de diferencias finitas en el dominio temporal (FDTD) son de los métodos más simples, tanto conceptual como a nivel de implementación dentro de las técnicas de ondas completas usadas para resolver problemas en electromagnetismo\cite{schneider2010}. Dichas técnicas permiten simulaciones de gran tamaño que pueden llegar a ser muy eficientes, además de flexibles al simular materiales complejos como medios dispersivos\cite{werner2007}. 
 
-En este proyecto se busca estudiar la interacción de EMW planas en tres dimensiones que al propagarse se encuentran con un medio dieléctrico esférico utilizando herramientas computacionales siguiendo la metodología propuesta por \cite{houle2020} con el método FDTD. También, debido a la geometría del problema, se desea comparar los resultados numéricos obtenidos respecto a las soluciones analíticas obtenidas usando expansiones de Bessel modificadas.  Para resolver el problema se propondrá una solución en Python. 
+En este proyecto se busca estudiar la interacción de EMW planas en tres dimensiones que al propagarse se encuentran con un medio dieléctrico esférico utilizando herramientas computacionales siguiendo la metodología propuesta por \cite{houle2020} con el método FDTD. También, debido a la geometría del problema, se desea comparar los resultados numéricos obtenidos respecto a las soluciones analíticas obtenidas usando expansiones de Bessel modificadas.  Para resolver el problema se propondrá una solución en \texttt{C++}. 
 
 \section{Marco Teórico}
 
@@ -203,97 +208,116 @@ Estas relaciones debe derivarse para cada una de las tres dimensiones para cumpl
 
 \section{Resultados}
 
-Basado en la solución presentada por \cite{houle2020} se implementó un puerto a \texttt{C++}  usando paralización de memoria compartida con \texttt{OpenMP}, los gráficos que se presentan a continuación fueron generados mediante \texttt{Gnuplot}, el cuál también se uso para filtrar los datos obtenidos del código.  A continuación presentaré los resultados obtenidos
+Basado en la solución presentada por \cite{houle2020} se implementó un puerto a \texttt{C++}  usando paralización de memoria compartida con \texttt{OpenMP}, los gráficos que se presentan a continuación fueron generados mediante \texttt{Gnuplot}, el cuál también se uso para filtrar los datos obtenidos del código.  
+
+Antes de comenzar con los resultados obtenidos quiero aclarar que me referiré	 al campo auxiliar $\textbf{H}$ como campo magnético, ya que en este caso la permisividad se toma como constante tanto fuera como dentro de PML. Ambos campos son proporcionales en este caso, por conveniencia es más simple denominar al campo obtenido como campo magnético. No es este el caso para el vector de desplazamiento $\textbf{D}$ y el campo eléctrico $\textbf{E}$, en este caso no se hará mención del primero.
 
 Recordando que en este caso lo que tenemos la solución de los campos $\tilde{\textbf{E}}(\textbf{x}, \omega)$ y $\tilde{\textbf{H}}(\textbf{x}, \omega)$ \footnote{en este caso particular no nos interesa el campo magnético o el campo auxiliar, ya que su magnitud es muy pequeña comparada con lo encontrado para $E$}, se obtuvo para un espacio de $(40\times 40 \times 40)$ $cm^3$ la solución completa de estas cantidades para tres frecuencias distintas. A partir de esto, y debido a la complejidad de los datos, se decidió que la mejor forma de presentar los resultados es mediante la presentación de la magnitud total del campo eléctrico y no de sus componentes por separado, ya que esta fue la forma que encontré más optima para presentar el comportamiento general de las ondas de forma compacta y simple de entender. 
 	
-En el siguiente gráfico de la figura \ref{fig:amp} se muestra la amplitud del campo eléctrico total $E(20, y, 20, \omega)$ donde se tomaron tres frecuencias $50$ MHz, $100$ MHz y $200$ MHz (lineas continuas), y se comparan con resultados analíticos al usar la ecuación de Helmholtz para calcular el campo eléctrico usando las funciones de Bessel y de Legendre \cite{houle2020}.
+En el siguiente gráfico \footnote{los gráficos están vectorizados, en caso de no poder apreciar bien su contenido es posible hacer zoom en el documento sin perder calidad.} de la figura \ref{fig:amp} se muestra la amplitud del campo eléctrico total $E(20, y, 20, \omega)$ donde se tomaron tres frecuencias $50$ MHz, $100$ MHz y $200$ MHz (lineas continuas), y se comparan con resultados analíticos al usar la ecuación de Helmholtz para calcular el campo eléctrico usando las funciones de Bessel y de Legendre \cite{houle2020}.
 
 	\begin{figure}[htb!]
-		\label{fig:amp}
 		\centering
 		\includegraphics[width = 0.8\textwidth]{../plots/amplitud.pdf}
 		\caption{Comparación del calculo de FDTD (lineas) con datos obtenidos de \cite{houle2020} sobre una expansión de Bessel (triángulos) a lo largo del eje principal de una esfera dieléctrica de $20 cm$ de diámetro, con $\varepsilon_r  = 30$ y $\sigma = 0.3$. } 
+		\label{fig:amp}
 	\end{figure}
 	
-Ahora, en la figura \ref{fig:mult_E} se puede ver el campo eléctrico proyectado en el plano $XY$ para distintos valores de $z$, donde que hay una esfera dieléctrica en el centro del espacio de solución (el PML).  Cada una de estas proyecciones presenta una mayor o menor intensidad en el campo eléctrico dependiendo de la posición en $z$. También puede observarse claramente la silueta de la esfera en algunos de los gráficos.
+Ahora, en la figura \ref{fig:mult_E} se puede ver un contorno del campo eléctrico proyectado en el plano $XY$ para distintos valores de $z$, donde que hay una esfera dieléctrica en el centro del espacio de solución (el PML).  Cada una de estas proyecciones presenta una mayor o menor intensidad en el campo eléctrico dependiendo de la posición en $z$. También puede observarse claramente la silueta de la esfera en algunos de los gráficos.
 	
 	\begin{figure}[htb!]
-		\label{fig:mult_E}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/field_multiple_z_slices.pdf}
 		\caption{Contorno de la magnitud del campo eléctrico $E(x,y,z)$ calculado en diferentes z}
+		\label{fig:mult_E}
 	\end{figure}
 
 En la figura \ref{fig:3D19} se tiene una proyección 3D de la intensidad del campo eléctrico en distintos planos, donde se fija una de las coordenadas espaciales en $38 cm$ en una región dentro de la esfera dieléctrica. La idea es visualizar la intensidad del campo en el espacio cercano a la esfera lo que nos permite identificar como afecta este objeto a la magnitud de la onda incidente.
 	
 	\begin{figure}[htb!]
-		\label{fig:3D19}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/electric_field3d19.pdf}
 		\caption{Visualización en 3D de la magnitud del campo magnético $E(x,y,z)$ proyectado en diferentes planos  fijando la coordenada espacial a $19 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+		\label{fig:3D19}
 	\end{figure}
 
 Similar al caso anterior, en la figura \ref{fig:3D26} se tiene la proyección	en 3D de la intensidad de campo eléctrico en diferentes planos, donde se fija una de las coordenadas espaciales en $26 cm$ en una región cercana, pero no en el interior de la esfera dieléctrica, esto nos permitirá luego analizar y discutir bajo una mejor base el efecto del PML sobre el campo eléctrico incidente. 
 
 	\begin{figure}[htb!]
-		\label{fig:3D26}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/electric_field3d26.pdf}
 		\caption{Visualización en 3D de la magnitud del campo eléctrico $E(x,y,z)$ proyectado en diferentes planos  fijando la coordenada espacial a $26 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+		\label{fig:3D26}
 	\end{figure}
 
 Por último, sobre la magnitud del campo eléctrico nos interesa estudiar una región lejos de la esfera, en la figura \ref{fig:3D38} podemos ver la proyección en distintos planos donde se fija una de las coordenadas espaciales en $38 cm$.
 
 	\begin{figure}[htb!]
-		\label{fig:3D38}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/electric_field3d38.pdf}
 		\caption{Visualización en 3D de la magnitud del campo eléctrico $E(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $38 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+		\label{fig:3D38}
 	\end{figure}
 	
-También se estudio el comportamiento de ciertas componentes del campo eléctrico y magnético, se determinó que las componentes que presentan algún comportamiento interesante son las componentes $E_z(x, y, z)$ y $H_y(x,y,z)$ de los campos calculados. Primero en la figura \ref{3DZ19} se presenta la proyección de la componente $z$ del campo eléctrico en una región dentro de la esfera. De forma similar, la figura \ref{fig:3DZ38} presenta la misma componente del campo eléctrico, pero en una región alejada del PML. La proyección en el plano YZ resultó prácticamente nula, razón por la cual no se incluye, esto también se exhibe en la magnitud del campo eléctrico $E$, y las otras componentes, por lo que se puede aproximar el campo eléctrico como $\textbf{E}(y, z)$.
+También se estudio el comportamiento de ciertas componentes del campo eléctrico y magnético, se determinó que las componentes que presentan algún comportamiento interesante son las componentes $E_z(x, y, z)$ y $H_y(x,y,z)$ de los campos calculados. Primero en la figura \ref{fig:3DZ19} se presenta la proyección de la componente $z$ del campo eléctrico en una región dentro de la esfera. De forma similar, la figura \ref{fig:3DZ26} presenta la misma componente del campo eléctrico, pero en una región alejada del PML. La proyección en el plano YZ resultó prácticamente nula, razón por la cual no se incluye, esto también se exhibe en la magnitud del campo eléctrico $E$, y las otras componentes, por lo que se puede aproximar el campo eléctrico como $\textbf{E}(y, z)$.
 
 	\begin{figure}[htb!]
 		\label{fig:3DZ19}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/electric_field3dZ19.pdf}
 		\caption{Visualización en 3D de la componente $z$, del campo eléctrico  $E_z(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $19 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+		\label{fig:3DZ19}
 	\end{figure}
 	
 	
 	\begin{figure}[htb!]
-		\label{fig:3DZ38}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/electric_field3dZ26.pdf}
 		\caption{Visualización en 3D de la componente $z$, del campo eléctrico $E_z(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $26 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+		\label{fig:3DZ26}
 	\end{figure}
 	
-Para terminar esta sección de resultados, se tiene en las figura \ref{fig:3DH19} y \ref{fig:3DH38} la componente $y$ del campo magnético, $H_z(x,y,z)$ proyectado en distintos planos. La proyección en el plano XY resultó poco interesante, ya que la componentes es prácticamente nula, por lo que se tiene que el campo magnético es más aproximado a $\textbf{H}(x,y)$.
+Para terminar esta sección de resultados, se tiene en las figuras \ref{fig:3DH19} y \ref{fig:3DH38} la componente $y$ del campo magnético, $H_z(x,y,z)$ proyectado en distintos planos. La proyección en el plano XY resultó poco interesante, ya que la componentes es prácticamente nula, por lo que se tiene que el campo magnético es más aproximado a $\textbf{H}(x,y)$.
 	
 	\begin{figure}[htb!]
-		\label{fig:3DH19}
 		\centering
 		\includegraphics[width = \textwidth]{../plots/magnetic_field3dY19.pdf}
 		\caption{Visualización en 3D de la componente $y$, del campo magnético $H_y(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $19 cm$. Figura de la izquierda plano XZ. Figura de la derecha plano YZ.}
+		 \label{fig:3DH19}
 	\end{figure}
 	
-	
-	\begin{figure}[htb!]
-		\label{fig:3DH26}
+	\begin{figure}[htb!] 
 		\centering
 		\includegraphics[width = \textwidth]{../plots/magnetic_field3dY38.pdf}
 		\caption{Visualización en 3D de la componente $y$, del campo magnético $H_y(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $38 cm$. Figura de la izquierda plano XZ. Figura de la derecha plano YZ.}
+		\label{fig:3DH38}
 	\end{figure}
 	
 
 \section{Análisis}
 
+En la figura \ref{fig:amp} se puede notar que la aproximación numérica es decente para las frecuencias de $100 MHz$  y $200 MHz$, sin embargo, para la frecuencia $50 MHz$ a medida que aumenta $x$ la aproximación se va deteriorando, esto sin embargo, no es un problema del método como tal sino más bien un error en la semántica del código, esto se puede comprobar de la solución de \cite{houle2020} donde se obtiene un mejor ajuste de los datos. Pese a una exhaustiva revisión del código no se pudo encontrar el bug, sin embargo, el debuggin llevado a cabo garantiza que la estructura del código es correcta y los ordenes de magnitud son correctos en todos las pruebas que se llevaron a cabo, sin embargo no fue posible encontrar el problema exacto que genera el desajuste de datos, la hipótesis es que el problema está relacionado con la transformada de Fourier, sin embargo, no se logra encontrar exactamente el problema. La teoría y la solución del problema realizada en \texttt{Python} sugiere que debe existir cierto error. Sin embargo, puede verse que el comportamiento de los resultados es similar en comportamiento que se puede ver de la solución teórica. 
+
+De la figura \ref{fig:mult_E} puede verse claramente que hay una distorsión de la magnitud del campo eléctrico dentro de la región de la esfera, esto se puede ver de las proyecciones en $Z = 10$, $20$, $25$ y $30$ regiones que están cercanas a la esfera, en $Z = 0$ y $Z = 39$ se puede ver que la magnitud es bastante uniforme, este comportamiento también se refleja en las superficies de las figuras \ref{fig:3D19}, \ref{fig:3D26} y \ref{fig:3D38}, de todas ellas se puede ver que para las superficies en contacto con la esfera dieléctrica, hay un claro cambio del campo en las fronteras. Esto claro es de esperarse ya que en las componentes perpendiculares del campo eléctrico a la superficie del dieléctrico deben cambiar. En este caso, como el dieléctrico tiene geometría esférica y el campo eléctrico se resolvió	en coordenadas cartesianas, no es posible notar la parte paralela a la superficies. No obstante, el hecho de que podamos distinguir la región dentro como fuera de la esfera es un resultado necesario para confirmar que el campo obtenido numéricamente se comporta físicamente como se espera. Además, cabe recalcar que la solución de los campos en todo el espacio están en una distancia corta con el dieléctrico, por lo tanto no se puede esperar un campo totalmente uniforme, debe haber una deformación del campo incluso en regiones fuera del dieléctrico y dentro del espacio de la solución. 
+
+El comportamiento de los campos también, y como es de esperar se refleja en la componente $E_z$ donde en ambas proyecciones de la superficie es apreciable la distorsión del campo, lo interesante pasa en el plano $XZ$ para la componente en $z$ del campo eléctrico, parece haber una dependencia más fuerte del campo eléctrico para valores de $z$ en los bordes, especialmente en el borde de $z$ cercanos a cero, esto se puede apreciar en las figuras \ref{fig:3DZ19} y \ref{fig:3DZ26} en los gráficos de la derecha. Comportamiento similar se presenta para la componente del campo magnético $H_y$ de la figura \ref{fig:3DH19} que está dentro de la esfera, que es donde podemos ver su mayor variación en el plano YZ, este es realmente el único gráfico donde se puede apreciar un campo magnético que varia fuertemente, los otro pese no a ser homogéneos, varian suavemente. Para el campo eléctrico en todas las superficies obtenidas para el plano XY se tiene un comportamiento justo como el que se discute para la magnitud del campo. Claramente, los datos sugieren que la mayor contribución del campo eléctrico es su componente $E_z$ y para el campo magnético es $H_y$, realmente, los datos obtenidos de la simulación \footnote{pueden consultarse en el repositorio}, sugieren que los campos son perpendiculares entre y que se deforman cerca del dieléctrico estos comportamientos son totalmente esperados. 
 
 \section{Conclusiones}
+
+Se implementó la solución de campos electromagnéticas incidentes sobre un PML en \texttt{C++} con paralización de memoria compartida donde se plantearon las ecuaciones de Maxwell con las condiciones de frontera para el problema, del código se logro calcular numéricamente los campos $\textbf{E}$ y $\textbf{H}$\footnote{$\textbf{D}$ se calcula dentro del código pero no se guarda el output }.
+
+Se analizó el comportamiento de los campos eléctrico y magnético al interactuar con el PML viendo su comportamiento y comparando con la solución analítica, donde se concluye que el comportamiento de los campos es consistente con los que se espera teóricamente para estos al haber un cambio de interfaz entre dos medios.
+
+Se reconoce que puede existir un error semántico en el código de \texttt{C++} que provoca que los campos no se ajusten tan bien como se espera de otras implementaciones numéricas realizadas, sin embargo, no se logra determinar la causa exacta del problema.
+
+Como reflexión final, todavía hay espacio de mejora para el código que genera un comportamiento esperado, pero no termina de calzar con otras implementaciones, además durante la implementación se reconoce que es un código que puede ser optimizado, principalmente en su estructura funcional. Corregir estos problemas y obtener resultados más convincentes es definitivamente un reto, y puede ser un proyecto a futuro \footnote{referirse al repositorio para ver el proyecto en su totalidad este informe es solo una breve presentación de los resultados generales.}
+
+\section{Sobre el proyecto}
+
+Este proyecto se puede encontrar en su totalidad en el repositorio \url{https://github.com/Aaron299792/Impeding-waves-on-PML-.git} aquí se encuentra el código en \texttt{C++} así como un Jupyter notebook con la solución en python. Dentro de este repositorio se pueden encontrar todos los datos y scripts usados en el proyecto. Además  en el directorio \texttt{simul} puede encontrarse una simulación corta de la magnitud del campo eléctrico proyectada sobre el plano XY para todos los valores de $z$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
 \bibliographystyle{ieeetr}
 \bibliography{references.bib}
 	
-	\end{document}
+\end{document}
