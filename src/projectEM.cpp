@@ -261,11 +261,11 @@ rvec calculate_field_strength(int ie, int je, int ke, rvec& fieldx, rvec& fieldy
 void write_field(int ie, int je, int ke, rvec& fieldx, rvec& fieldy, rvec& fieldz, rvec& field_strength, string filename){
     ofstream field_file(filename);
     if (field_file.is_open()){
-        field_file << "X(cm)" << "Y(cm)" << "Z (cm)" <<"Field_X(x,y,z)" << " " <<  "Field_Y(x,y,z)" << " " << "Field_Z(x,y,z)" << " " << "Field_Strength(x,y,z)" << endl;
+        field_file << "X(cm)" << "\t" << "Y(cm)" << "\t" << "Z (cm)" << "\t" <<"Field_X(x,y,z)" << "\t" <<  "Field_Y(x,y,z)" << "\t" << "Field_Z(x,y,z)" << "\t" << "Field_Strength(x,y,z)" << endl;
         for (int k = 0; k < ke; ++k){
             for (int j = 0; j < je; ++j){
                 for (int i = 0; i < ie; ++i){
-                    field_file << i << " " << j << " " << k << " " << fieldx[ (i*je + j)*ke + k ] << " " << fieldy[ (i*je + j)*ke + k ] << " " << fieldz[ (i*je + j)*ke + k ] << " " << field_strength[ (i*je + j)*ke + k ] << endl;
+                    field_file << i << "\t" << j << " \t" << k << "\t" << fieldx[ (i*je + j)*ke + k ] << "\t" << fieldy[ (i*je + j)*ke + k ] << "\t" << fieldz[ (i*je + j)*ke + k ] << "\t" << field_strength[ (i*je + j)*ke + k ] << endl;
                 }
             }
         }
@@ -274,6 +274,20 @@ void write_field(int ie, int je, int ke, rvec& fieldx, rvec& fieldy, rvec& field
         cout << "Unable to open file" << endl;
     }
 }
+
+void write_amp_file(int je, rvec& amp, string filename){
+    ofstream amp_file(filename);
+    if (amp_file.is_open()){
+        amp_file << "X (cm)" << "\t" << "Amplitud 50 MHz" << "\t" << "Amplitud 100 MHz" << "\t" << "Amplitud 200 MHz" << endl;
+        for (int j = 0; j < je; ++j){
+            amp_file << j - 20  << "\t" <<amp[j] << "\t" << amp[je + j] << "\t" << amp[2*je + j] << endl;
+        }
+    }
+    else{
+        cout << "Unable to open file" << endl;
+    }
+}
+
 
 int main(){
     int ie, je, ke, ic, jc, kc, ia, ja, ka, ib, jb, kb;
@@ -498,13 +512,9 @@ int main(){
         }
     }
 
-    for (int j = 0; j < je; ++j){
-        cout << amp[j] << " " << amp[je + j] << " " << amp[2*je + j] << endl;
-    }
-    cout << endl;
-
-    write_field(ie, je, ke, ex, ey, ez, e_strength, "E_field.txt");
-    write_field(ie, je, ke, hx, hy, hz, h_strength, "H_field.txt");
+    write_amp_file(je, amp, "../data/amp_data.txt");
+    write_field(ie, je, ke, ex, ey, ez, e_strength, "../data/E_field.txt");
+    write_field(ie, je, ke, hx, hy, hz, h_strength, "../data/H_field.txt");
     
     return 0;
 }

@@ -7,7 +7,6 @@ unset key
 set size ratio 1
 
 do for [i=0:39] {
-    # Add page number and Z value as title
     set label 1 sprintf("Page %d/40 - Z = %d cm", i+1, i) at graph 0.5, 1.05 center
     set xlabel "X (cm)"
     set ylabel "Y (cm)"
@@ -17,6 +16,5 @@ do for [i=0:39] {
     
     plot "E_field.txt" every ::start_row::end_row using 1:2:7 with image
     
-    # Remove label for next plot
     unset label 1
 }

@@ -1,6 +1,6 @@
 # Create animation through Z slices
 set terminal gif animate delay 50 size 800,600
-set output "./plots/field_animation.pdf"
+set output "../plots/field_animation.gif"
 set pm3d map
 set palette rgbformulae 33,13,10
 unset key

@@ -203,6 +203,8 @@ Estas relaciones debe derivarse para cada una de las tres dimensiones para cumpl
 
 \section{Resultados}
 
+Basado en la solución presentada por \cite{houle200} se implementó un puerto a \texttt{C++}  usando paralización:q 
+
 El problema planteado se soluciona en \texttt{C++}, los gráficos que se presentan a continuación fueron generados mediante \texttt{Gnuplot}. A continuación, recordando que en este caso lo que tenemos la solución de los campos $\tilde{\textbf{E}}(\textbf{x}, \omega)$ y $\tilde{\textbf{H}}(\textbf{x}, \omega)$ \footnote{en este caso particular no nos interesa el campo magnético o el campo auxiliar, ya que su magnitud es muy pequeña comparada con lo encontrado para $E$}, se obtuvo para un espacio de $(40\times 40 \times 40)$ $cm^3$ la solución completa de estas cantidades para tres frecuencias distintas. A partir de esto, y debido a la complejidad de los datos, se decidió que la mejor forma de presentar los resultados es mediante la presentación de la magnitud total del campo eléctrico y no de sus componentes por separado, ya que esta fue la forma que encontré más optima para presentar el comportamiento general de las ondas de forma compacta y simple de entender. 
 	
 En el siguiente gráfico de la figura \ref{fig:amp} se muestra la amplitud del campo eléctrico total $E(20, y, 20, \omega)$ donde se tomaron tres frecuencias $50$ MHz, $100$ MHz y $200$ MHz (lineas continuas), y se comparan con resultados analíticos al usar la ecuación de Helmholtz para calcular el campo eléctrico usando las funciones de Bessel y de Legendre \cite{houle2020}.
