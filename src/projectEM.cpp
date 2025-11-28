@@ -1,3 +1,14 @@
+/*******************************************************************
+    Universidad de Costa Rica
+    Projecto Electromagnetismo II -- IIS-2025
+    Title: Impeding Electromagnetic Waves on a PML.
+    Author: Aaron Sanabria Martínez. C17208
+    
+    Credits: This work was bases on the Python solution presented
+    by Jennifer E. Houle, Dennis M. Sullivan (2019) in their book 
+    Electromagnetic Simulation Using the FDTD Method with Python
+*******************************************************************/
+
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -8,9 +19,6 @@
 #ifdef _OPENMP
     #include <omp.h>
 #endif
-
-#define assertm(exp, msg) assert(((void)msg, exp))
-
 
 typedef std::vector<double> rvec;
 typedef std::vector< std::complex<double> > cvec;
@@ -323,12 +331,13 @@ int main(){
     cvec pt(number_of_frequencies*ie*je*ke, complex<double>(0.0, 0.0) );
     rvec amp(number_of_frequencies*je, 0.0);
 
+    //specify dielectric sphere
     rvec epsilon(2, 1.0);
     rvec sigma(2, 0.0);
     epsilon[1] = 30.0;
     sigma[1] = 0.3;
     double radius = 10.0;
-    
+   
     #pragma omp for schedule(static) collapse(3)   
     for (int i = ia; i <= ib; ++i){
         for (int j = ja; j <= jb; ++j){
