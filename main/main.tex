@@ -1,0 +1,297 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}	% Para caracteres en español
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{multirow,booktabs}
+\usepackage[table]{xcolor}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{wrapfig}
+\usepackage{tikz}
+\usetikzlibrary{3d}
+\usepackage{setspace}
+\usepackage{calc}
+\usepackage{multicol}
+\usepackage[spanish]{babel}
+\usepackage{cancel}
+\usepackage[retainorgcmds]{IEEEtrantools}
+\usepackage[margin=3cm]{geometry}
+\usepackage{amsmath}
+\usepackage{lipsum}
+\newlength{\tabcont}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+\usepackage{empheq}
+\usepackage{framed}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\colorlet{shadecolor}{orange!15}
+\parindent 0in
+\parskip 12pt
+\geometry{margin=1in, headsep=0.25in}
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}
+\newtheorem{reg}{Rule}
+\newtheorem{exer}{Exercise}
+\newtheorem{note}{Note}
+\newcommand{\identity}{1\kern-0.25em\text{l}}
+
+\pagenumbering{arabic}
+
+\title{Simulación FDTD en 3D de una Onda Electromagnética Plana Incidente sobre un Diélectrico Esférico \\ \Large Proyecto Programado }
+\author{C17208. Aaron Sanabria Martínez\footnote{aaron.sanabria@ucr.ac.cr} }
+
+\begin{document}
+	%\setcounter{section}{8}
+	
+	%\thispagestyle{empty}
+	\maketitle
+
+  \begin{abstract}
+    \lipsum[10]
+  \end{abstract}
+
+  %\newpage
+	%\tableofcontents
+	%\newpage
+	
+	\section*{Objetivos}
+	\subsection*{Objetivo General:}
+	Analizar la interacción de ondas electromagnéticas planas en tres dimensiones y un medio dieléctrico esférico usando el método de diferencias finitas en el dominio temporal (FDTD)y comparar la solución númerica con los resultados analícos obtenidos mediante expansiones de Bessel.
+
+	\subsection*{Objetivos Específicos}
+			
+		\begin{enumerate}
+      \item Plantear la solución en C++.
+			\item Discretizar el espacio del sistema a estudiar en grillas finitas.
+			\item Utilizar el método de FDTD para discretizar las ecuaciones de Faraday y Amperè en su forma diferencial que gobiernan el problema.
+      \item Plantear las condiciones de frontera e iniciales del problema para ondas que se propagan e interaccionan con un medio dieléctrico disipativo.
+      \item Simular el sistema y obtener el campo $\textbf{E}$ y los vectores $\textbf{D}$ y $\textbf{H}$.
+      \item Comparar los resultados numéricos con aquellos obtenidos analíticamente.
+		\end{enumerate}
+	
+	\section{Introducción al problema}
+	
+El estudio de las ondas electromagnéticas (EMW) y de los materiales y medios dieléctricos son conceptos fundamentales y esenciales en el desarrollo de la teoría electromagnética. Usualmente el primer encuentro que se tiene en el estudio de las Ondas Electromagnéticas (EMW) introducen el problema en un medio completamente vacío donde la radiación no interactúa con ningún medio. Esto, pese a que da una intuición de como se comporta la radiación, no permite extender el conocimiento a los muchos fenómenos que surgen cuando las EMW interactúan con el medio. Efectos de resonancia de gran interés surgen cuando las ondas que se propagan en espacio vacío interactúan con un medio dieléctrico. 
+
+La simulación de ondas electromagnéticas en materiales dieléctricos es importante en muchas aplicaciones que controlan energía electromagnética, algunos ejemplos son cristales fotónicos y estructuras dieléctricas de aceleración. Muchos materias de gran importancia son anisotrópicos y presentan fenómenos de gran importancia, por tanto, simular sistemas con tensores dieléctricos resulta una tarea de suma bastante fructífera \cite{werner2007}. Los métodos de diferencias finitas en el dominio temporal (FDTD) son de los métodos más simples, tanto conceptual como a nivel de implementación dentro de las técnicas de ondas completas usadas para resolver problemas en electromagnetismo\cite{schneider2010}. Dichas técnicas permiten simulaciones de gran tamaño que pueden llegar a ser muy eficientes, además de flexibles al simular materiales complejos como medios dispersivos\cite{werner2007}. 
+
+En este proyecto se busca estudiar la interacción de EMW planas en tres dimensiones que al propagarse se encuentran con un medio dieléctrico esférico utilizando herramientas computacionales siguiendo la metodología propuesta por \cite{houle2020} con el método FDTD. También, debido a la geometría del problema, se desea comparar los resultados numéricos obtenidos respecto a las soluciones analíticas obtenidas usando expansiones de Bessel modificadas.  Para resolver el problema se propondrá una solución en Python. 
+
+\section{Marco Teórico}
+
+\subsection{Ecuaciones de Maxwell en regiones lejos de fuentes}
+
+Un campo que es función tanto del tiempo como de las coordenadas espaciales puede ser llamado onda \cite{harrington1965}. En la simulación de un medio con una constante dieléctrica diferente a $1$, en una región del espacio donde no hay cargas libres ni corrientes libres; es decir, en el espacio recíproco $\textbf{D}(\omega) = \varepsilon_0\varepsilon^*_r(\omega)\textbf{E}(\omega)$, se tiene que se debe cumplir la ley de Faraday y la ley de Amperè tal que
+
+  \begin{eqnarray}
+    \partial_t \textbf{D} &=& \nabla\times\textbf{H},\\
+    \partial_t \textbf{H} &=& -\frac{1}{\mu_0}\nabla\times\textbf{E}
+  \end{eqnarray}
+
+  donde $\textbf{D}$ es el vector de desplazamiento. Normalizando las expresiones
+
+  \begin{eqnarray}
+    \tilde{\textbf{E}} &=& \sqrt{\frac{\varepsilon_0}{\mu_0}}\textbf{E},\\
+  \tilde{\textbf{D}} &=& \sqrt{\frac{1}{\varepsilon_0\mu_0}}\textbf{D} = c\textbf{D},  \end{eqnarray}
+
+lo que nos lleva a 
+
+\begin{eqnarray}\label{eq:sis}
+  \partial_t\tilde{\textbf{D}} &=& c\nabla\times\textbf{H},\label{eq:D}\\
+  \tilde{\textbf{D}}(\omega) &=& \varepsilon^*_r(\omega)\tilde{\textbf{E}},\\
+  \partial_t\textbf{H} &=& -c\nabla\times\tilde{\textbf{E}}\label{eq:H}
+\end{eqnarray}
+
+donde $c = 1/\sqrt{\varepsilon_0\mu_0}$ es la velocidad de la luz en el vacío. 
+
+
+\subsection{Material disipativo}
+
+Cuando un material tiene conductividad finita, se debe añadir un termino de corriente de conducción a la ley de Amperè \cite{schneider2010}, por tanto, en una región libre de fuentes la ley de Amperè se vuelve 
+
+\begin{equation}
+  \sigma\textbf{E} + \varepsilon\partial_t\textbf{E} = \nabla\times\textbf{H}
+\end{equation}
+
+Para un medio dieléctrico disipativo tal como el que nos disponemos a estudiar, se tiene entonces que \cite{houle2020} 
+
+\begin{equation}
+  \varepsilon_r^*(\omega) = \varepsilon_r + \frac{\sigma}{i\omega\varepsilon_0}
+\end{equation}
+
+Sustituyendo en $\textbf{D}(\omega)$, se tiene que
+
+\begin{equation}
+  \textbf{D}(\omega) = \varepsilon_r\textbf{E}(\omega) + \frac{1}{i\omega\varepsilon_0}\textbf{E}(\omega)
+\end{equation}
+
+En el espacio de tiempo por propiedades de la transformada de Fourier,
+
+\section{Metodología}
+
+La intensión es resolver el set de Ecs. \eqref{eq:sis} en un medio dieléctrico disipativo, primero consideraremos ondas en espacio vacío que reducen el set de ecuaciones a \eqref{eq:D} y \eqref{eq:H} que se pueden escribir como
+
+\begin{eqnarray}
+  \partial_t \tilde{D}_i = c\epsilon_{ijk}\partial_j H_k,\\
+  \partial_t H_i = -c\epsilon_{ijk}\partial_j \tilde{E}_k
+\end{eqnarray}
+
+Para resolver este problema es necesario discretizar el espacio tal que asumiremos que $\textbf{E}$ y $\textbf{H}$ están entrelazados en una celda cúbica, esto se conoce como la celda de Yee véase la figura \ref{fig:yeecell}.
+
+\begin{figure}[hbt]
+  \label{fig:yeecell}
+  \centering
+  \includegraphics[width = 0.4\textwidth]{yeecell.png}
+  \caption{Celda de Yee. Tomado de \cite{houle2020}}
+\end{figure}
+
+Discretizando mediante diferencias finitas de segundo orden, se obtiene, 
+
+\begin{shaded}
+\texttt{dx [i,j,k] += 0.5*(hz[i,j,k] - hz[i, j-1, k] - hy[i,j,k] + hy[i,j, k - 1])}\newline
+\texttt{dy [i,j,k] += 0.5*(hx[i,j,k] - hx[i, j, k-1] - hz[i,j,k] + hz[i-1,j, k])}\newline     
+\texttt{dz [i,j,k] += 0.5*(hy[i,j,k] - hy[i-1, j, k] - hx[i,j,k] + hx[i,j-1, k])}\newline     
+\texttt{hx [i,j,k] += 0.5*(ey[i,j, k+1] - ey[i, j, k] - ez[i,j+1,k] + ez[i,j, k])}\newline     
+\texttt{hy [i,j,k] += 0.5*(ez[i+1,j,k] - ez[i, j, k] - ex[i,j,k+1] + ex[i-1,j, k])}\newline     
+\texttt{hz [i,j,k] += 0.5*(ex[i,j+1,k] - ex[i, j, k] - ex[i+1,j,k] + ey[i,j, k])}     
+\end{shaded}
+
+En tres dimensiones, el campo $\textbf{E}$ se atenúa como el cuadrado de la distancia al propagarse desde la fuente puntual, esto genera problemas para visualizarlo, por tanto, se usará una antena de dipolo para visualizar mejor la propagación del campo \cite{houle2020}. 
+
+\subsection{Capa Acoplada Perfectamente}
+
+Las capas acopladas perfectamente es un artificio para la computación de las grillas del FDTD. Todos los PML actúan como materiales disipativo, que absorben los campos que se alejan del interior de la grilla. Es anisotrópico y se construye de tal manera que no hay perdida en la dirección tangencial a la interface entre la región sin disipación y la de PML \cite{schneider2010}.
+
+La idea básica del un PML es que una onda que se propaga en un medio $A$ e incide en un medio $B$, la cantidad de reflexión está dada por las impedancias de dos medios dados por la ecuación
+
+\begin{equation}
+  \Gamma = \frac{\eta_B - \eta_A}{\eta_B + \eta_A}
+\end{equation}
+
+donde $\Gamma$ es el coeficiente de reflexión, y $\eta_A$ y $\eta_B$ son las impedancias del medio. En tres dimensiones las ecuaciones luego de tomar en cuenta la disipación del medio se vuelven \footnote{La derivación de las ecuaciones es fácil, sin embargo es trabajoso y no aporta valor didáctico por lo que se decidió no adjuntar la derivación},
+
+\begin{equation}
+  i\omega\left[ 1 + \frac{\sigma_D(x)}{i\omega\varepsilon_0}\right]\left[ 1 + \frac{\sigma_D(y)}{i\omega\varepsilon_0}\right]D_z = c(\partial_xH_y - \partial_yH_x) + c\frac{\sigma_D(z)}{i\omega\varepsilon_0}(\partial_xH_y - \partial_yH_x)
+\end{equation}
+
+ahora definimos,
+
+\begin{equation}
+  I_{D_z} = \frac{\text{curl\_h}}{i\omega}
+\end{equation}
+
+Sea $xn(i) = \sigma_D(i)\Delta t /2\varepsilon_0$ un parámetro auxiliar que varia conductividades, se define también un parámetro $g$ tal que 
+
+\begin{eqnarray}
+  f_{i1} = xn(i)\\
+  g_{i2}(i) = \frac{1}{1 + xn(i)}\\
+  g_{i3}(i) = \frac{1 - xn(i)}{1 + xn(i)}
+\end{eqnarray}
+
+De tal manera que la discretización es
+
+\begin{eqnarray}
+  \small \text{curl\_h} &=& H_y^n\left(i + \frac{1}{2}, j, k + \frac{1}{2}\right) - H_y^n\left(i - \frac{1}{2}, j, k + \frac{1}{2}\right) \nonumber\\&-& H_x^n\left(i, j + \frac{1}{2}, k + \frac{1}{2}\right) + H_x^n\left(i,j - \frac{1}{2}, k + \frac{1}{2}\right),\\
+  I_{D_z}^{n + 1/2}\left(i, j, k + \frac{1}{2}\right) &=& I_{D_z}^{n - 1/2}\left(i, j, k + \frac{1}{2}\right) + \text{curl\_h},\\
+  \small D_z^{n+1/2}\left(i,j, k + \frac{1}{2}\right) &=& g_{i3}(i)g_{j3}(j)D_z^{n-1/2}\left(i,j, k + \frac{1}{2}\right) \nonumber\\ &+& g_{i2}(i)g_{j2}(j)\left[0.5\text{curl\_h} + g_{k1}(k)I_{D_z}^{n + 1/2}\left(i,j,k + \frac{1}{2}\right)\right]
+\end{eqnarray}
+
+Estas relaciones debe derivarse para cada una de las tres dimensiones para cumplir con todas las nueve ecuaciones. Para el dieléctrico también se deben especificar los parámetros en la grilla. 
+
+\section{Resultados}
+
+El problema planteado se soluciona en \texttt{C++}, los gráficos que se presentan a continuación fueron generados mediante \texttt{Gnuplot}. A continuación, recordando que en este caso lo que tenemos la solución de los campos $\tilde{\textbf{E}}(\textbf{x}, \omega)$ y $\tilde{\textbf{H}}(\textbf{x}, \omega)$ \footnote{en este caso particular no nos interesa el campo magnético o el campo auxiliar, ya que su magnitud es muy pequeña comparada con lo encontrado para $E$}, se obtuvo para un espacio de $(40\times 40 \times 40)$ $cm^3$ la solución completa de estas cantidades para tres frecuencias distintas. A partir de esto, y debido a la complejidad de los datos, se decidió que la mejor forma de presentar los resultados es mediante la presentación de la magnitud total del campo eléctrico y no de sus componentes por separado, ya que esta fue la forma que encontré más optima para presentar el comportamiento general de las ondas de forma compacta y simple de entender. 
+	
+En el siguiente gráfico de la figura \ref{fig:amp} se muestra la amplitud del campo eléctrico total $E(20, y, 20, \omega)$ donde se tomaron tres frecuencias $50$ MHz, $100$ MHz y $200$ MHz (lineas continuas), y se comparan con resultados analíticos al usar la ecuación de Helmholtz para calcular el campo eléctrico usando las funciones de Bessel y de Legendre \cite{houle2020}.
+
+	\begin{figure}[htb!]
+		\label{fig:amp}
+		\centering
+		\includegraphics[width = 0.8\textwidth]{../plots/amplitud.pdf}
+		\caption{Comparación del calculo de FDTD (lineas) con datos obtenidos de \cite{houle2020} sobre una expansión de Bessel (triángulos) a lo largo del eje principal de una esfera dieléctrica de $20 cm$ de diámetro, con $\varepsilon_r  = 30$ y $\sigma = 0.3$. } 
+	\end{figure}
+	
+Ahora, en la figura \ref{fig:mult_E} se puede ver el campo eléctrico proyectado en el plano $XY$ para distintos valores de $z$, donde que hay una esfera dieléctrica en el centro del espacio de solución (el PML).  Cada una de estas proyecciones presenta una mayor o menor intensidad en el campo eléctrico dependiendo de la posición en $z$. También puede observarse claramente la silueta de la esfera en algunos de los gráficos.
+	
+	\begin{figure}[htb!]
+		\label{fig:mult_E}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/field_multiple_z_slices.pdf}
+		\caption{Contorno de la magnitud del campo eléctrico $E(x,y,z)$ calculado en diferentes z}
+	\end{figure}
+
+En la figura \ref{fig:3D19} se tiene una proyección 3D de la intensidad del campo eléctrico en distintos planos, donde se fija una de las coordenadas espaciales en $38 cm$ en una región dentro de la esfera dieléctrica. La idea es visualizar la intensidad del campo en el espacio cercano a la esfera lo que nos permite identificar como afecta este objeto a la magnitud de la onda incidente.
+	
+	\begin{figure}[htb!]
+		\label{fig:3D19}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/electric_field3d19.pdf}
+		\caption{Visualización en 3D de la magnitud del campo magnético $E(x,y,z)$ proyectado en diferentes planos  fijando la coordenada espacial a $19 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+	\end{figure}
+
+Similar al caso anterior, en la figura \ref{fig:3D26} se tiene la proyección	en 3D de la intensidad de campo eléctrico en diferentes planos, donde se fija una de las coordenadas espaciales en $26 cm$ en una región cercana, pero no en el interior de la esfera dieléctrica, esto nos permitirá luego analizar y discutir bajo una mejor base el efecto del PML sobre el campo eléctrico incidente. 
+
+	\begin{figure}[htb!]
+		\label{fig:3D26}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/electric_field3d26.pdf}
+		\caption{Visualización en 3D de la magnitud del campo eléctrico $E(x,y,z)$ proyectado en diferentes planos  fijando la coordenada espacial a $26 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+	\end{figure}
+
+Por último, sobre la magnitud del campo eléctrico nos interesa estudiar una región lejos de la esfera, en la figura \ref{fig:3D38} podemos ver la proyección en distintos planos donde se fija una de las coordenadas espaciales en $38 cm$.
+
+	\begin{figure}[htb!]
+		\label{fig:3D38}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/electric_field3d38.pdf}
+		\caption{Visualización en 3D de la magnitud del campo eléctrico $E(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $38 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+	\end{figure}
+	
+También se estudio el comportamiento de ciertas componentes del campo eléctrico y magnético, se determinó que las componentes que presentan algún comportamiento interesante son las componentes $E_z(x, y, z)$ y $H_y(x,y,z)$ de los campos calculados. Primero en la figura \ref{3DZ19} se presenta la proyección de la componente $z$ del campo eléctrico en una región dentro de la esfera. De forma similar, la figura \ref{fig:3DZ38} presenta la misma componente del campo eléctrico, pero en una región alejada del PML. La proyección en el plano YZ resultó prácticamente nula, razón por la cual no se incluye, esto también se exhibe en la magnitud del campo eléctrico $E$, y las otras componentes, por lo que se puede aproximar el campo eléctrico como $\textbf{E}(y, z)$.
+
+	\begin{figure}[htb!]
+		\label{fig:3DZ19}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/electric_field3dZ19.pdf}
+		\caption{Visualización en 3D de la componente $z$, del campo eléctrico  $E_z(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $19 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+	\end{figure}
+	
+	
+	\begin{figure}[htb!]
+		\label{fig:3DZ38}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/electric_field3dZ26.pdf}
+		\caption{Visualización en 3D de la componente $z$, del campo eléctrico $E_z(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $26 cm$. Figura de la izquierda plano XY. Figura de la derecha plano XZ.}
+	\end{figure}
+	
+Para terminar esta sección de resultados, se tiene en las figura \ref{fig:3DH19} y \ref{fig:3DH38} la componente $y$ del campo magnético, $H_z(x,y,z)$ proyectado en distintos planos. La proyección en el plano XY resultó poco interesante, ya que la componentes es prácticamente nula, por lo que se tiene que el campo magnético es más aproximado a $\textbf{H}(x,y)$.
+	
+	\begin{figure}[htb!]
+		\label{fig:3DH19}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/magnetic_field3dY19.pdf}
+		\caption{Visualización en 3D de la componente $y$, del campo magnético $H_y(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $19 cm$. Figura de la izquierda plano XZ. Figura de la derecha plano YZ.}
+	\end{figure}
+	
+	
+	\begin{figure}[htb!]
+		\label{fig:3DH26}
+		\centering
+		\includegraphics[width = \textwidth]{../plots/magnetic_field3dY38.pdf}
+		\caption{Visualización en 3D de la componente $y$, del campo magnético $H_y(x,y,z)$ proyectado en diferentes planos fijando la coordenada espacial a $38 cm$. Figura de la izquierda plano XZ. Figura de la derecha plano YZ.}
+	\end{figure}
+	
+
+\section{Análisis}
+
+
+\section{Conclusiones}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+\bibliographystyle{ieeetr}
+\bibliography{references.bib}
+	
+	\end{document}

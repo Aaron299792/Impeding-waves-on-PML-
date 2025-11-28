@@ -1,0 +1,8 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Introducción al problema}{4}{}%
+\contentsline {section}{\numberline {2}Marco Teórico}{5}{}%
+\contentsline {subsection}{\numberline {2.1}Ecuaciones de Maxwell en regiones lejos de fuentes}{5}{}%
+\contentsline {subsection}{\numberline {2.2}Material disipativo}{5}{}%
+\contentsline {section}{\numberline {3}Metodología}{6}{}%
+\contentsline {subsection}{\numberline {3.1}Capa Acoplada Perfectamente}{7}{}%
+\contentsline {subsection}{\numberline {3.2}Posibles Contingencias}{8}{}%
