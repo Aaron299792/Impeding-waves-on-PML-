@@ -1,0 +1,51 @@
+@book{houle2020,
+   title =     {Electromagnetic Simulation Using the FDTD Method with Python},
+   author =    {Jennifer E. Houle, Dennis M. Sullivan},
+   publisher = {Wiley-IEEE Press},
+   isbn =      {9781119565802; 1119565804},
+   year =      {2020},
+   edition =   {3.}
+}
+@misc{schneider2010,
+	author       = {John B. Schneider},
+	title        = {Understanding the Finite‐Difference Time‐Domain Method},
+	url 		     = {https://eecs.wsu.edu/~schneidj/ufdtd},
+	year         = {2010},
+	note         = {Last updated April 08, 2025}
+}
+
+@article{werner2007,
+title = {A stable FDTD algorithm for non-diagonal, anisotropic dielectrics},
+journal = {Journal of Computational Physics},
+volume = {226},
+number = {1},
+pages = {1085-1101},
+year = {2007},
+issn = {0021-9991},
+doi = {https://doi.org/10.1016/j.jcp.2007.05.008},
+url = {https://www.sciencedirect.com/science/article/pii/S0021999107002227},
+author = {Gregory R. Werner and John R. Cary},
+keywords = {Dielectric, Tensor dielectric, Anisotropic dielectric, Electromagnetic, FDTD, Simulation},
+abstract = {A stable FDTD algorithm is developed for simulating Maxwell’s equations in anisotropic dielectric materials with principal axes not aligned with the grid. The algorithm is stable because the finite-difference operator that converts D to E is symmetric and positive semidefinite; for contrast, a previously developed asymmetric algorithm is shown to suffer from late-time instabilities. The presented algorithm has second-order error for continuous dielectric materials, and the error can be reduced to third-order by Richardson extrapolation. Applied to dielectrics with sharp interfaces, the algorithm has first-order error, even when averaging the dielectric within partially filled grid cells. However, averaging the dielectric permits Richardson extrapolation to obtain second-order error.}
+}
+
+@article{werner2013,
+title = {A more accurate, stable, FDTD algorithm for electromagnetics in anisotropic dielectrics},
+journal = {Journal of Computational Physics},
+volume = {255},
+pages = {436-455},
+year = {2013},
+issn = {0021-9991},
+doi = {https://doi.org/10.1016/j.jcp.2013.08.009},
+url = {https://www.sciencedirect.com/science/article/pii/S0021999113005391},
+author = {Gregory R. Werner and Carl A. Bauer and John R. Cary},
+keywords = {Dielectric, Anisotropic, Electromagnetic, FDTD, Embedded boundary, Maxwell},
+abstract = {A more accurate, stable, finite-difference time-domain (FDTD) algorithm is developed for simulating Maxwellʼs equations with isotropic or anisotropic dielectric materials. This algorithm is in many cases more accurate than previous algorithms (G.R. Werner et al., 2007 [5]; A.F. Oskooi et al., 2009 [7]), and it remedies a defect that causes instability with high dielectric contrast (usually for ϵ≫10) with either isotropic or anisotropic dielectrics. Ultimately this algorithm has first-order error (in the grid cell size) when the dielectric boundaries are sharp, due to field discontinuities at the dielectric interface. Accurate treatment of the discontinuities, in the limit of infinite wavelength, leads to an asymmetric, unstable update (C.A. Bauer et. al., 2011 [6]), but the symmetrized version of the latter is stable and more accurate than other FDTD methods. The convergence of field values supports the hypothesis that global first-order error can be achieved by second-order error in bulk material with zero-order error on the surface. This latter point is extremely important for any applications measuring surface fields.}
+}
+
+@book{harrington1965,
+   title =     {Time-harmonic electromagnetic fields},
+   author =    {Harrington R.F.},
+   publisher = {Institute of Electrical and Electronics Enginee},
+   url =       {libgen.li/file.php?md5=1bed1fbbef643b4f0d06cfab545b3ac3},
+   year = {1965}}
